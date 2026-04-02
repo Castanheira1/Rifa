@@ -1,59 +1,87 @@
-CREATE TABLE IF NOT EXISTS users (
+-- Apaga as tabelas antigas (ordem importa por causa das dependências)
+DROP TABLE IF EXISTS pagamentos;
+DROP TABLE IF EXISTS reservas;
+DROP TABLE IF EXISTS numeros_rifa;
+DROP TABLE IF EXISTS rifas;
+DROP TABLE IF EXISTS users;
+
+-- Recria as tabelas com todos os campos corretos
+
+CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   open_id VARCHAR(255) UNIQUE,
   username VARCHAR(255) UNIQUE,
   password_hash VARCHAR(255),
   name VARCHAR(255),
   email VARCHAR(255),
-  role VARCHAR(20) DEFAULT 'user' CHECK (role IN ('admin', 'user')),
-  login_method VARCHAR(20) CHECK (login_method IN ('oauth', 'password')),
+  role VARCHAR(20) DEFAULT 'user',
+  login_method VARCHAR(20),
   last_signed_in TIMESTAMP,
   created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS rifas (
+CREATE TABLE rifas (
   id SERIAL PRIMARY KEY,
   titulo VARCHAR(255) NOT NULL,
   descricao TEXT,
+  regras TEXT,
   total_numeros INT NOT NULL,
   valor_numero DECIMAL(10, 2) NOT NULL,
-  status VARCHAR(20) DEFAULT 'ativa' CHECK (status IN ('ativa', 'encerrada', 'cancelada')),
+  pix_chave VARCHAR(255),
+  pix_qr_code TEXT,
+  tempo_reserva_minutos INT DEFAULT 30,
+  imagem_url TEXT,
+  status VARCHAR(20) DEFAULT 'ativa',
   criado_por INT NOT NULL REFERENCES users(id),
   criado_em TIMESTAMP DEFAULT NOW(),
   atualizado_em TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS numeros_rifa (
+CREATE TABLE numeros_rifa (
   id SERIAL PRIMARY KEY,
   rifa_id INT NOT NULL REFERENCES rifas(id),
   numero INT NOT NULL,
-  status VARCHAR(20) DEFAULT 'disponivel' CHECK (status IN ('disponivel', 'reservado', 'pago')),
-  comprador_nome VARCHAR(255),
-  comprador_telefone VARCHAR(50),
-  reservado_em TIMESTAMP,
+  status VARCHAR(20) DEFAULT 'disponivel',
+  reserva_nome VARCHAR(255),
+  reserva_whatsapp VARCHAR(50),
+  reserva_expira_em TIMESTAMP,
   pago_em TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS reservas (
+CREATE TABLE reservas (
   id SERIAL PRIMARY KEY,
   rifa_id INT NOT NULL REFERENCES rifas(id),
   numero_id INT NOT NULL REFERENCES numeros_rifa(id),
-  comprador_nome VARCHAR(255) NOT NULL,
-  comprador_telefone VARCHAR(50) NOT NULL,
-  status VARCHAR(20) DEFAULT 'pendente' CHECK (status IN ('pendente', 'confirmada', 'cancelada')),
-  criado_em TIMESTAMP DEFAULT NOW(),
-  atualizado_em TIMESTAMP DEFAULT NOW()
+  cliente_nome VARCHAR(255) NOT NULL,
+  cliente_whatsapp VARCHAR(50) NOT NULL,
+  cliente_email VARCHAR(255),
+  status VARCHAR(20) DEFAULT 'pendente',
+  expira_em TIMESTAMP,
+  criado_em TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS pagamentos (
+CREATE TABLE pagamentos (
   id SERIAL PRIMARY KEY,
   rifa_id INT NOT NULL REFERENCES rifas(id),
+  numero_id INT REFERENCES numeros_rifa(id),
   reserva_id INT REFERENCES reservas(id),
-  comprador_nome VARCHAR(255) NOT NULL,
-  comprador_telefone VARCHAR(50) NOT NULL,
-  valor DECIMAL(10, 2) NOT NULL,
-  status VARCHAR(20) DEFAULT 'pendente' CHECK (status IN ('pendente', 'aprovado', 'rejeitado')),
-  pix_code TEXT,
-  criado_em TIMESTAMP DEFAULT NOW(),
-  atualizado_em TIMESTAMP DEFAULT NOW()
+  cliente_nome VARCHAR(255) NOT NULL,
+  cliente_whatsapp VARCHAR(50) NOT NULL,
+  status VARCHAR(20) DEFAULT 'pendente',
+  confirmado_em TIMESTAMP,
+  confirmado_por INT REFERENCES users(id),
+  observacao_admin TEXT,
+  criado_em TIMESTAMP DEFAULT NOW()
+);
+
+-- Recria o admin (senha: Rifa.Wanderlei)
+INSERT INTO users (username, password_hash, name, role, login_method, last_signed_in, created_at)
+VALUES (
+  'admin',
+  'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
+  'Administrador',
+  'admin',
+  'password',
+  NOW(),
+  NOW()
 );
