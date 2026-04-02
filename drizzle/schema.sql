@@ -1,65 +1,59 @@
 CREATE TABLE IF NOT EXISTS users (
-  id INT PRIMARY KEY AUTO_INCREMENT,
+  id SERIAL PRIMARY KEY,
   open_id VARCHAR(255) UNIQUE,
   username VARCHAR(255) UNIQUE,
   password_hash VARCHAR(255),
   name VARCHAR(255),
   email VARCHAR(255),
-  role ENUM('admin', 'user') DEFAULT 'user',
-  login_method ENUM('oauth', 'password'),
-  last_signed_in TIMESTAMP NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  role VARCHAR(20) DEFAULT 'user' CHECK (role IN ('admin', 'user')),
+  login_method VARCHAR(20) CHECK (login_method IN ('oauth', 'password')),
+  last_signed_in TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS rifas (
-  id INT PRIMARY KEY AUTO_INCREMENT,
+  id SERIAL PRIMARY KEY,
   titulo VARCHAR(255) NOT NULL,
   descricao TEXT,
   total_numeros INT NOT NULL,
   valor_numero DECIMAL(10, 2) NOT NULL,
-  status ENUM('ativa', 'encerrada', 'cancelada') DEFAULT 'ativa',
-  criado_por INT NOT NULL,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (criado_por) REFERENCES users(id)
+  status VARCHAR(20) DEFAULT 'ativa' CHECK (status IN ('ativa', 'encerrada', 'cancelada')),
+  criado_por INT NOT NULL REFERENCES users(id),
+  criado_em TIMESTAMP DEFAULT NOW(),
+  atualizado_em TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS numeros_rifa (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  rifa_id INT NOT NULL,
+  id SERIAL PRIMARY KEY,
+  rifa_id INT NOT NULL REFERENCES rifas(id),
   numero INT NOT NULL,
-  status ENUM('disponivel', 'reservado', 'pago') DEFAULT 'disponivel',
+  status VARCHAR(20) DEFAULT 'disponivel' CHECK (status IN ('disponivel', 'reservado', 'pago')),
   comprador_nome VARCHAR(255),
   comprador_telefone VARCHAR(50),
-  reservado_em TIMESTAMP NULL,
-  pago_em TIMESTAMP NULL,
-  FOREIGN KEY (rifa_id) REFERENCES rifas(id)
+  reservado_em TIMESTAMP,
+  pago_em TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS reservas (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  rifa_id INT NOT NULL,
-  numero_id INT NOT NULL,
+  id SERIAL PRIMARY KEY,
+  rifa_id INT NOT NULL REFERENCES rifas(id),
+  numero_id INT NOT NULL REFERENCES numeros_rifa(id),
   comprador_nome VARCHAR(255) NOT NULL,
   comprador_telefone VARCHAR(50) NOT NULL,
-  status ENUM('pendente', 'confirmada', 'cancelada') DEFAULT 'pendente',
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (rifa_id) REFERENCES rifas(id),
-  FOREIGN KEY (numero_id) REFERENCES numeros_rifa(id)
+  status VARCHAR(20) DEFAULT 'pendente' CHECK (status IN ('pendente', 'confirmada', 'cancelada')),
+  criado_em TIMESTAMP DEFAULT NOW(),
+  atualizado_em TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS pagamentos (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  rifa_id INT NOT NULL,
-  reserva_id INT,
+  id SERIAL PRIMARY KEY,
+  rifa_id INT NOT NULL REFERENCES rifas(id),
+  reserva_id INT REFERENCES reservas(id),
   comprador_nome VARCHAR(255) NOT NULL,
   comprador_telefone VARCHAR(50) NOT NULL,
   valor DECIMAL(10, 2) NOT NULL,
-  status ENUM('pendente', 'aprovado', 'rejeitado') DEFAULT 'pendente',
+  status VARCHAR(20) DEFAULT 'pendente' CHECK (status IN ('pendente', 'aprovado', 'rejeitado')),
   pix_code TEXT,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (rifa_id) REFERENCES rifas(id),
-  FOREIGN KEY (reserva_id) REFERENCES reservas(id)
+  criado_em TIMESTAMP DEFAULT NOW(),
+  atualizado_em TIMESTAMP DEFAULT NOW()
 );
