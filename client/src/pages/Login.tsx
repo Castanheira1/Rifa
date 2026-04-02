@@ -26,10 +26,15 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const normalizedUsername = username.trim();
+    if (!normalizedUsername) {
+      toast.error("Usuário é obrigatório");
+      return;
+    }
     setIsLoading(true);
 
     try {
-      await loginMutation.mutateAsync({ username, password });
+      await loginMutation.mutateAsync({ username: normalizedUsername, password });
     } finally {
       setIsLoading(false);
     }
