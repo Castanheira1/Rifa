@@ -8,15 +8,13 @@
 4. Cole o SQL abaixo:
 
 ```sql
-INSERT INTO users (username, passwordHash, name, role, loginMethod, lastSignedIn, createdAt, updatedAt)
+INSERT INTO users (username, password_hash, name, role, login_method, last_signed_in, created_at)
 VALUES (
   'admin',
   'SHA256_HASH_AQUI',
   'Administrador',
   'admin',
   'password',
-  NOW(),
-  NOW(),
   NOW()
 );
 ```
@@ -51,15 +49,13 @@ Se sua senha é `admin123`, o hash SHA-256 é:
 
 Então o SQL fica:
 ```sql
-INSERT INTO users (username, passwordHash, name, role, loginMethod, lastSignedIn, createdAt, updatedAt)
+INSERT INTO users (username, password_hash, name, role, login_method, last_signed_in, created_at)
 VALUES (
   'admin',
   '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f1979c67f',
   'Administrador',
   'admin',
   'password',
-  NOW(),
-  NOW(),
   NOW()
 );
 ```
@@ -90,7 +86,7 @@ Para alterar a senha do admin no Supabase:
 
 ```sql
 UPDATE users 
-SET passwordHash = 'NOVO_HASH_SHA256'
+SET password_hash = 'NOVO_HASH_SHA256'
 WHERE username = 'admin';
 ```
 
@@ -108,7 +104,7 @@ Gere o novo hash SHA-256 da sua nova senha e substitua `NOVO_HASH_SHA256`.
 
 **Esqueci a senha**
 - Acesse o Supabase SQL Editor
-- Execute: `UPDATE users SET passwordHash = 'NOVO_HASH' WHERE username = 'admin';`
+- Execute: `UPDATE users SET password_hash = 'NOVO_HASH' WHERE username = 'admin';`
 - Gere um novo hash e atualize
 
 ---

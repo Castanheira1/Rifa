@@ -31,11 +31,22 @@ export const appRouter = router({
       .mutation(async ({ input, ctx }) => {
         const { getUserByUsername, updateUserLastSignedIn } = await import('./auth-db');
         const { verifyPassword } = await import('./auth');
-        const { upsertUser } = await import('./db');
+        const { getDb } = await import('./db');
         const { getSessionCookieOptions } = await import('./_core/cookies');
         const { COOKIE_NAME } = await import('@shared/const');
 
-        const user = await getUserByUsername(input.username);
+        const username = input.username.trim();
+        if (!username) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Username is required' });
+        }
+
+        const database = await getDb();
+        if (!database) {
+          console.error('[Auth] Login failed: database is not available');
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database connection unavailable' });
+        }
+
+        const user = await getUserByUsername(username);
         if (!user || !user.passwordHash || !verifyPassword(input.password, user.passwordHash)) {
           throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Invalid credentials' });
         }
