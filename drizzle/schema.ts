@@ -29,8 +29,13 @@ export const rifas = pgTable("rifas", {
   id: serial("id").primaryKey(),
   titulo: varchar("titulo", { length: 255 }).notNull(),
   descricao: text("descricao"),
+  regras: text("regras"),
   totalNumeros: integer("total_numeros").notNull(),
   valorNumero: decimal("valor_numero", { precision: 10, scale: 2 }).notNull(),
+  pixChave: varchar("pix_chave", { length: 255 }),
+  pixQrCode: text("pix_qr_code"),
+  tempoReservaMinutos: integer("tempo_reserva_minutos").default(30),
+  imagemUrl: text("imagem_url"),
   status: varchar("status", { length: 20 }).default("ativa"),
   criadoPor: integer("criado_por").notNull(),
   criadoEm: timestamp("criado_em").defaultNow(),
@@ -45,9 +50,9 @@ export const numerosRifa = pgTable("numeros_rifa", {
   rifaId: integer("rifa_id").notNull(),
   numero: integer("numero").notNull(),
   status: varchar("status", { length: 20 }).default("disponivel"),
-  compradorNome: varchar("comprador_nome", { length: 255 }),
-  compradorTelefone: varchar("comprador_telefone", { length: 50 }),
-  reservadoEm: timestamp("reservado_em"),
+  reservaNome: varchar("reserva_nome", { length: 255 }),
+  reservaWhatsapp: varchar("reserva_whatsapp", { length: 50 }),
+  reservaExpiraEm: timestamp("reserva_expira_em"),
   pagoEm: timestamp("pago_em"),
 });
 
@@ -58,11 +63,12 @@ export const reservas = pgTable("reservas", {
   id: serial("id").primaryKey(),
   rifaId: integer("rifa_id").notNull(),
   numeroId: integer("numero_id").notNull(),
-  compradorNome: varchar("comprador_nome", { length: 255 }).notNull(),
-  compradorTelefone: varchar("comprador_telefone", { length: 50 }).notNull(),
+  clienteNome: varchar("cliente_nome", { length: 255 }).notNull(),
+  clienteWhatsapp: varchar("cliente_whatsapp", { length: 50 }).notNull(),
+  clienteEmail: varchar("cliente_email", { length: 255 }),
   status: varchar("status", { length: 20 }).default("pendente"),
+  expiraEm: timestamp("expira_em"),
   criadoEm: timestamp("criado_em").defaultNow(),
-  atualizadoEm: timestamp("atualizado_em").defaultNow(),
 });
 
 export type Reserva = InferSelectModel<typeof reservas>;
@@ -71,14 +77,15 @@ export type InsertReserva = InferInsertModel<typeof reservas>;
 export const pagamentos = pgTable("pagamentos", {
   id: serial("id").primaryKey(),
   rifaId: integer("rifa_id").notNull(),
+  numeroId: integer("numero_id"),
   reservaId: integer("reserva_id"),
-  compradorNome: varchar("comprador_nome", { length: 255 }).notNull(),
-  compradorTelefone: varchar("comprador_telefone", { length: 50 }).notNull(),
-  valor: decimal("valor", { precision: 10, scale: 2 }).notNull(),
+  clienteNome: varchar("cliente_nome", { length: 255 }).notNull(),
+  clienteWhatsapp: varchar("cliente_whatsapp", { length: 50 }).notNull(),
   status: varchar("status", { length: 20 }).default("pendente"),
-  pixCode: text("pix_code"),
+  confirmadoEm: timestamp("confirmado_em"),
+  confirmadoPor: integer("confirmado_por"),
+  observacaoAdmin: text("observacao_admin"),
   criadoEm: timestamp("criado_em").defaultNow(),
-  atualizadoEm: timestamp("atualizado_em").defaultNow(),
 });
 
 export type Pagamento = InferSelectModel<typeof pagamentos>;
