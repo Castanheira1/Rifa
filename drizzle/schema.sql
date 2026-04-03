@@ -78,7 +78,7 @@ CREATE TABLE pagamentos (
 INSERT INTO users (username, password_hash, name, role, login_method, last_signed_in, created_at)
 VALUES (
   'admin',
-  'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
+  'f987f9269ae5e10c5cc595bcb8707bb222248dca3004f582c93663fbfd819f70',
   'Administrador',
   'admin',
   'password',
