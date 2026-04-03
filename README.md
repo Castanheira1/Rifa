@@ -25,7 +25,7 @@ Plataforma completa de gestão de rifas online com painel administrativo, sistem
 - **Frontend**: React 19 + Tailwind CSS 4 + shadcn/ui
 - **Backend**: Node.js + Express + tRPC
 - **Banco de Dados**: PostgreSQL + Drizzle ORM
-- **Autenticação**: Manus OAuth
+- **Autenticação**: Sistema de Login Local (Usuário/Senha)
 - **Armazenamento**: AWS S3
 - **Deploy**: Render
 
@@ -185,7 +185,7 @@ Veja [DEPLOY.md](./DEPLOY.md) para instruções detalhadas de deploy no Render.
 
 ## Segurança
 
-- Autenticação via OAuth Manus
+- Autenticação via Login Local (Admin)
 - Controle de acesso baseado em roles (admin/user)
 - Validação de entrada com Zod
 - Proteção contra CSRF
@@ -212,7 +212,7 @@ Veja [DEPLOY.md](./DEPLOY.md) para instruções detalhadas de deploy no Render.
 ## Suporte
 
 Para dúvidas ou problemas:
-1. Verifique a documentação em [DEPLOY.md](./DEPLOY.md)
+1. Verifique a documentação em [DEPLOY.md](./DEPLOY.md) e [CRIAR_ADMIN.md](./CRIAR_ADMIN.md)
 2. Abra uma issue no repositório
 3. Entre em contato com o suporte
 
